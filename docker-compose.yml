@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  text-to-image-api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./output:/app/output
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu] 
