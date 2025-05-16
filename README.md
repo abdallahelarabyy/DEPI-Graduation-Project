@@ -20,8 +20,8 @@ A FastAPI application that generates images from text descriptions using Stable 
 
 1. Clone this repository:
    ```
-   git clone <your-repository-url>
-   cd <repository-directory>
+   git clone https://github.com/abdallahelarabyy/DEPI-Graduation-Project.git
+   cd DEPI-Graduation-Project
    ```
 
 2. Create a virtual environment and activate it:
