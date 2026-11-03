@@ -2,6 +2,8 @@
 
 A FastAPI application that generates images from text descriptions using Stable Diffusion models.
 
+> Graduation project for the **Digital Egypt Pioneers Initiative (DEPI)**.
+
 ## Features
 
 - Text to image generation using Stable Diffusion
@@ -80,7 +82,13 @@ curl -X POST "http://localhost:8000/generate" \
 
 ### Changing the Model
 
-You can change the Stable Diffusion model by modifying the `model_id` variable in the `startup_event` function in `main.py`. Available models can be found on [Hugging Face](https://huggingface.co/models?pipeline_tag=text-to-image).
+The app uses [`stable-diffusion-v1-5/stable-diffusion-v1-5`](https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5) by default. To use a different Stable Diffusion model, set the `MODEL_ID` environment variable:
+
+```bash
+MODEL_ID=<huggingface-model-id> python main.py
+```
+
+Available models can be found on [Hugging Face](https://huggingface.co/models?pipeline_tag=text-to-image).
 
 ### Performance Optimization
 
@@ -89,10 +97,6 @@ For better performance:
 1. Use a CUDA-compatible GPU
 2. Reduce image dimensions (width and height)
 3. Reduce the number of inference steps (30-40 often gives good results)
-
-## License
-
-[MIT License](LICENSE)
 
 ## Acknowledgements
 

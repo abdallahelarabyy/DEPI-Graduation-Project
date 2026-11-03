@@ -34,7 +34,8 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 @app.on_event("startup")
 async def startup_event():
     global pipe
-    model_id = "runwayml/stable-diffusion-v1-5"  # You can change this to any other Stable Diffusion model
+    # Override with the MODEL_ID environment variable to use any other Stable Diffusion model
+    model_id = os.environ.get("MODEL_ID", "stable-diffusion-v1-5/stable-diffusion-v1-5")
     
     # Check if CUDA is available
     device = "cuda" if torch.cuda.is_available() else "cpu"
