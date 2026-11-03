@@ -1,5 +1,7 @@
 # Text-to-Image Generator with Stable Diffusion
 
+[![tests](https://github.com/abdallahelarabyy/DEPI-Graduation-Project/actions/workflows/tests.yml/badge.svg)](https://github.com/abdallahelarabyy/DEPI-Graduation-Project/actions/workflows/tests.yml)
+
 A FastAPI application that generates images from text descriptions using Stable Diffusion models.
 
 > Graduation project for the **Digital Egypt Pioneers Initiative (DEPI)**.
@@ -9,7 +11,13 @@ A FastAPI application that generates images from text descriptions using Stable 
 - Text to image generation using Stable Diffusion
 - Web interface for easy interaction
 - API endpoint for programmatic access
-- Customizable generation parameters (steps, guidance scale, dimensions)
+- Customizable generation parameters (steps, guidance scale, dimensions, negative prompt)
+- Reproducible results: pass a `seed`, or reuse the seed returned with every image
+- Input validation with clear error messages (for example, dimensions must be multiples of 8)
+- Non-blocking server: generation runs in a worker thread, one image at a time
+- Health endpoint that reports the model, the device (CUDA / Apple MPS / CPU) and any load error
+- Docker and docker-compose setup with GPU support
+- Automated API tests with a mocked pipeline (GitHub Actions)
 - Returns images as files or base64-encoded strings
 
 ## Requirements
@@ -58,10 +66,12 @@ The server will start on `http://localhost:8000`. You can access the web interfa
     - `negative_prompt` (optional): Things to avoid in the image
     - `num_inference_steps` (optional, default=50): Number of denoising steps
     - `guidance_scale` (optional, default=7.5): How closely to follow the prompt
-    - `width` (optional, default=512): Image width
-    - `height` (optional, default=512): Image height
+    - `width` / `height` (optional, default=512): image size, a multiple of 8 between 256 and 1024
+    - `seed` (optional): random seed. The same seed and parameters give the same image
     - `return_format` (optional, default="file"): "file" or "base64"
-- `GET /health`: Health check endpoint
+  - The seed used is returned in the JSON body (`seed`) or in the `X-Seed` response header
+  - Invalid parameters return `422` with a list of problems. If the model is not loaded, the endpoint returns `503`
+- `GET /health`: model status, model ID, device and load error (if any)
 
 ### Example API Usage
 
@@ -74,8 +84,32 @@ curl -X POST "http://localhost:8000/generate" \
   -F "guidance_scale=7.5" \
   -F "width=512" \
   -F "height=512" \
+  -F "seed=42" \
   -F "return_format=base64" \
   -o image.json
+```
+
+Using the included Python client:
+
+```bash
+python client.py "a beautiful landscape with mountains and a lake" --steps 30 --seed 42
+```
+
+### Running with Docker
+
+```bash
+docker compose up --build
+```
+
+The compose file reserves an NVIDIA GPU. Remove the `deploy` section to run on CPU.
+
+### Running the Tests
+
+The tests replace Stable Diffusion with a fake pipeline, so they run in about a second without a GPU or a model download:
+
+```bash
+pip install pytest httpx
+pytest
 ```
 
 ## Customization

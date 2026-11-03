@@ -154,6 +154,11 @@
             </div>
             
             <div class="form-group">
+                <label for="seed">Seed (optional, reuse it to reproduce an image):</label>
+                <input type="number" id="seed" min="0" placeholder="Random">
+            </div>
+
+            <div class="form-group">
                 <label for="returnFormat">Return Format:</label>
                 <select id="returnFormat">
                     <option value="base64">Base64 (Display in browser)</option>
@@ -172,6 +177,7 @@
         <div class="result hidden" id="result">
             <h3>Generated Image:</h3>
             <img id="generatedImage" alt="Generated image will appear here">
+            <p id="seedInfo"></p>
         </div>
     </div>
 
@@ -219,22 +225,37 @@
                 formData.append('width', widthInput.value);
                 formData.append('height', heightInput.value);
                 formData.append('return_format', returnFormatSelect.value);
-                
+                const seedInput = document.getElementById('seed');
+                if (seedInput.value !== '') {
+                    formData.append('seed', seedInput.value);
+                }
+                const seedInfo = document.getElementById('seedInfo');
+
                 try {
                     const response = await fetch('/generate', {
                         method: 'POST',
                         body: formData
                     });
-                    
+
                     if (!response.ok) {
-                        throw new Error(`Error: ${response.statusText}`);
+                        // Show the server's validation / error message when available
+                        let detail = response.statusText;
+                        try {
+                            const err = await response.json();
+                            detail = Array.isArray(err.detail)
+                                ? err.detail.map(d => d.msg || d).join('; ')
+                                : (err.detail || detail);
+                        } catch (_) {}
+                        throw new Error(detail);
                     }
-                    
+
                     if (returnFormatSelect.value === 'base64') {
                         const data = await response.json();
                         generatedImage.src = data.base64_image;
+                        seedInfo.textContent = `Seed: ${data.seed}`;
                         resultDiv.classList.remove('hidden');
                     } else {
+                        seedInfo.textContent = `Seed: ${response.headers.get('X-Seed')}`;
                         // For file download, create a blob and download it
                         const blob = await response.blob();
                         const url = window.URL.createObjectURL(blob);

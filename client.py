@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test script for the Text-to-Image API.
+Command-line client for the Text-to-Image API.
 This script demonstrates how to use the API programmatically.
 """
 
@@ -19,6 +19,7 @@ def generate_image(
     guidance_scale=7.5,
     width=512,
     height=512,
+    seed=None,
     return_format="base64",
     api_url="http://localhost:8000/generate"
 ):
@@ -49,6 +50,9 @@ def generate_image(
         "return_format": return_format
     }
     
+    if seed is not None:
+        data["seed"] = seed
+
     print(f"Generating image with prompt: '{prompt}'")
     print(f"Using parameters: {json.dumps({k: v for k, v in data.items() if k != 'prompt'})}")
     
@@ -76,13 +80,14 @@ def generate_image(
     return image
 
 def main():
-    parser = argparse.ArgumentParser(description="Test the Text-to-Image API")
+    parser = argparse.ArgumentParser(description="Generate an image with the Text-to-Image API")
     parser.add_argument("prompt", help="Text description of the image to generate")
     parser.add_argument("--negative", help="Negative prompt (things to avoid)", default="")
     parser.add_argument("--steps", type=int, help="Number of inference steps", default=50)
     parser.add_argument("--guidance", type=float, help="Guidance scale", default=7.5)
     parser.add_argument("--width", type=int, help="Image width", default=512)
     parser.add_argument("--height", type=int, help="Image height", default=512)
+    parser.add_argument("--seed", type=int, help="Random seed (reuse to reproduce an image)", default=None)
     parser.add_argument("--format", choices=["base64", "file"], help="Return format", default="base64")
     parser.add_argument("--url", help="API URL", default="http://localhost:8000/generate")
     parser.add_argument("--output", help="Output file path", default="generated_image.png")
@@ -96,6 +101,7 @@ def main():
         guidance_scale=args.guidance,
         width=args.width,
         height=args.height,
+        seed=args.seed,
         return_format=args.format,
         api_url=args.url
     )
